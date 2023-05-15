@@ -26,7 +26,7 @@ function getUserName()
     return $row['username'];
 }
 
-function getId($hash)
+function getUserId($hash)
 {
     $mysqli = getConnection();
     $stmt = $mysqli->prepare("SELECT id FROM users WHERE hash=?");

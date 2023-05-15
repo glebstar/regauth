@@ -28,6 +28,11 @@ function index()
 function reg()
 {
     if (isset($_POST['username'])) {
+        if (!$_POST['username']) {
+            $_SESSION['error'] = 'Не указано имя пользователя!';
+            require_once '../view/reg.php';
+            exit;
+        }
         $mysqli = getConnection();
         $stmt = $mysqli->prepare("SELECT id FROM users WHERE username=?");
         $stmt->bind_param("s", $_POST['username']);
@@ -35,24 +40,20 @@ function reg()
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
         if (isset($row['id'])) {
-            $_SESSION['error'] = 'Такое имя пользователя уже существует в базе данных';
+            $_SESSION['error'] = 'Такое имя пользователя уже существует в базе данных!';
             require_once '../view/reg.php';
             exit;
         }
 
         $hash = getHash();
-        $stmt = $mysqli->prepare("INSERT INTO users (username, hash) VALUES (?,?)");
+        $stmt = $mysqli->prepare("INSERT INTO `users` (`username`, `hash`) VALUES (?,?)");
         $stmt->bind_param("ss", $_POST['username'], $hash);
         $stmt->execute();
 
         $_SESSION['user_id'] = mysqli_insert_id($mysqli);
         $_SESSION['hash'] = $hash;
 
-        $page = '/';
-        echo '<script type="text/javascript">';
-        echo 'window.location.href="'.$page.'";';
-        echo '</script>';
-        die();
+        jsRedirect('/');
     } else {
         require_once '../view/reg.php';
         exit;
@@ -62,7 +63,7 @@ function reg()
 function login()
 {
     if (isset($_POST['hash']) && $_POST['hash']) {
-        if ($id = getId($_POST['hash'])) {
+        if ($id = getUserId($_POST['hash'])) {
             $_SESSION['user_id'] = $id;
         } else {
             $_SESSION['error'] = 'Пользователь не найден!';

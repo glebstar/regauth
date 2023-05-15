@@ -9,3 +9,11 @@ function getHash()
 
     return $hash;
 }
+
+function jsRedirect($page)
+{
+    echo '<script type="text/javascript">';
+    echo 'window.location.href="'.$page.'";';
+    echo '</script>';
+    die();
+}
